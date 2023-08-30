@@ -8,11 +8,13 @@ from dotenv import load_dotenv
 import openai
 import io
 
+from ml import SummaryModel
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key = OPENAI_API_KEY
 WHISPER_MODEL = "whisper-1"
+summary_model = SummaryModel()
 
 app = FastAPI()
 
