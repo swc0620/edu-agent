@@ -2,24 +2,17 @@
 
 ## Installation
 
-- Clone the repository
-- Install requirements
+- Clone this repository
 
 ```
-pip install -r requirements.txt
-```
-
-- Set API key in .env file with name `OPENAI_API_KEY`
-- Run `python main.py`
-
-```
-uvicorn main:app --reload
+docker-compose build
+docker-compose up
 ```
 
 ## Requirements
 
 - python 3.9.6
-- requirements.
+- requirements
 
 ## TODO
 

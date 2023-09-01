@@ -1,14 +1,17 @@
 """ module docstring """
+import io
 import os
 from typing import Union
-from fastapi import FastAPI, status, UploadFile, Form, File, HTTPException
-from fastapi.responses import JSONResponse, Response
-from fastapi.concurrency import run_in_threadpool
-from dotenv import load_dotenv
-import openai
-import io
 
+import openai
+from dotenv import load_dotenv
+from fastapi import FastAPI, status, UploadFile, Form, File, HTTPException, Depends
+from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import JSONResponse, Response
+
+from db import engine, SessionLocal
 from ml import SummaryModel
+import models
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -16,14 +19,36 @@ openai.api_key = OPENAI_API_KEY
 WHISPER_MODEL = "whisper-1"
 summary_model = SummaryModel()
 
+models.Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
+
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def store_summary(db: SessionLocal, summary: str) -> models.Audio:
+    db_audio = models.Audio(summary=summary)
+    db.add(db_audio)
+    db.commit()
+    db.refresh(db_audio)
+
+    return db_audio
 
 
 class NamedBytesIO(io.BytesIO):
     """A BytesIO subclass that has a name attribute"""
+
     def __init__(self, buffer, name=None):
         super().__init__(buffer)
         self.name = name
+
 
 def read_audio_file(audio_file: UploadFile):
     """Read audio file"""
@@ -38,7 +63,7 @@ def send_to_openai(audio):
         file=audio,
         model=WHISPER_MODEL,
     )
-    print(resp.text)
+    # TODO: send 'resp.text' to summary model
 
 
 @app.get("/")
@@ -54,14 +79,17 @@ def healthz():
 
 
 @app.post("/audio")
-async def upload_audio(filename: str = Form(...), audio_file: UploadFile = File(...)):
+async def upload_audio(filename: str = Form(...), audio_file: UploadFile = File(...), db: SessionLocal = Depends(get_db)):
     """Upload audio file endpoint"""
     if not audio_file or audio_file.filename.split('.')[-1] not in ["mp3", "mp4"]:
         raise HTTPException(status_code=400, detail="Invalid file format. Only mp3 and mp4 are supported.")
 
     await run_in_threadpool(read_audio_file, audio_file)
 
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"filename": filename})
+    db_audio = store_summary(db, "summary")
+    print(db_audio)
+
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"filename": filename, "id": db_audio.id})
 
 
 @app.get("/audio/{audio_id}")
@@ -72,4 +100,5 @@ async def polling_audio(audio_id: Union[str, int]):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

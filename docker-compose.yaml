@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_HOST=db
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=edu-agent
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=root
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

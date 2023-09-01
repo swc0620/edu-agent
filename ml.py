@@ -1,3 +1,5 @@
+from typing import Union
+
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.llm import LLMChain
 from langchain.schema.document import Document
@@ -10,10 +12,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 ## Summary Chain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-from langchain.chains import (
-    ReduceDocumentsChain, 
-    MapReduceDocumentsChain
-)
+from langchain.chains import ReduceDocumentsChain, MapReduceDocumentsChain
 
 
 ##### TEMPLATE ####
@@ -30,19 +29,16 @@ REDUCE_TEMPLATE = (
 )
 
 class SummaryModel():
-    
     def __init__(
         self,
         chunk_size: int = 1000,
         chunk_overlap: int = 100,
     ):
-        
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        
         ## 0. Text Splitter
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=self.chunk_size, 
+            chunk_size=self.chunk_size,
             chunk_overlap=self.chunk_overlap
         )
         llm = ChatOpenAI(temperature=0)
@@ -61,7 +57,7 @@ class SummaryModel():
             llm_chain=reduce_chain, 
             document_variable_name="doc_summaries"
         )
-        
+
         # 4. Reduce Chain 만들기
         # Combines and iteravely reduces the mapped documents
         reduce_documents_chain = ReduceDocumentsChain(
@@ -83,7 +79,7 @@ class SummaryModel():
 
     def _split_text(
         self, 
-        text: str | list[str]
+        text: Union[str, list[str]]
     ) -> list[Document]:
         """
         string 혹은 list of string으로된 text를 여러개의 chunk로 나눕니다.
@@ -99,7 +95,7 @@ class SummaryModel():
     
     def run(
         self, 
-        text: str | list[str]
+        text: Union[str, list[str]]
     ):
         """
         전체 요약 결과와 중간 요약 결과들을 리턴합니다.
