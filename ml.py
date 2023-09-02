@@ -25,7 +25,7 @@ MAP_TEMPLATE = (
 REDUCE_TEMPLATE = (
     """다음은 수업내용을 요약한 것이다:
     {doc_summaries}
-    위 내용들을 통해 전체적인 수업내용을 요약해줘:"""
+    위 내용들을 통해 전체적인 수업내용을 요약해줘.:"""
 )
 
 class SummaryModel():

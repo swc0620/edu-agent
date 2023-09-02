@@ -9,7 +9,7 @@ from fastapi import FastAPI, status, UploadFile, Form, File, HTTPException, Depe
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, Response
 
-from db import engine, SessionLocal
+# from db import engine, SessionLocal
 from ml import SummaryModel
 import models
 
@@ -19,27 +19,27 @@ openai.api_key = OPENAI_API_KEY
 WHISPER_MODEL = "whisper-1"
 summary_model = SummaryModel()
 
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 
 # Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
 
-def store_summary(db: SessionLocal, summary: str) -> models.Audio:
-    db_audio = models.Audio(summary=summary)
-    db.add(db_audio)
-    db.commit()
-    db.refresh(db_audio)
+# def store_summary(db: SessionLocal, summary: str) -> models.Audio:
+#     db_audio = models.Audio(summary=summary)
+#     db.add(db_audio)
+#     db.commit()
+#     db.refresh(db_audio)
 
-    return db_audio
+#     return db_audio
 
 
 class NamedBytesIO(io.BytesIO):
@@ -54,7 +54,7 @@ def read_audio_file(audio_file: UploadFile):
     """Read audio file"""
     audio = audio_file.file.read()
     contents = NamedBytesIO(audio, name=audio_file.filename)
-    send_to_openai(contents)
+    return send_to_openai(contents)
 
 
 def send_to_openai(audio):
@@ -63,7 +63,8 @@ def send_to_openai(audio):
         file=audio,
         model=WHISPER_MODEL,
     )
-    # TODO: send 'resp.text' to summary model
+    total_result, intermediate_results=summary_model.run(resp.text)
+    return total_result
 
 
 @app.get("/")
@@ -79,17 +80,19 @@ def healthz():
 
 
 @app.post("/audio")
-async def upload_audio(filename: str = Form(...), audio_file: UploadFile = File(...), db: SessionLocal = Depends(get_db)):
+async def upload_audio(audio_file: UploadFile = File(...)):
     """Upload audio file endpoint"""
     if not audio_file or audio_file.filename.split('.')[-1] not in ["mp3", "mp4"]:
         raise HTTPException(status_code=400, detail="Invalid file format. Only mp3 and mp4 are supported.")
 
-    await run_in_threadpool(read_audio_file, audio_file)
+    # summary_text=await run_in_threadpool(read_audio_file, audio_file)
+    summary_text=read_audio_file(audio_file)
 
-    db_audio = store_summary(db, "summary")
-    print(db_audio)
+    # db_audio = store_summary(db, summary_text)
+    # print(db_audio)
 
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"filename": filename, "id": db_audio.id})
+    # return JSONResponse(status_code=status.HTTP_201_CREATED, content={ "id": db_audio.id})
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content={"summary_text": summary_text})
 
 
 @app.get("/audio/{audio_id}")
