@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, status, UploadFile, Form, File, HTTPException, Depends
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, Response
+from mangum import Mangum
 
 # from db import engine, SessionLocal
 from ml import SummaryModel
@@ -22,6 +23,7 @@ summary_model = SummaryModel()
 # models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+handler = Mangum(app)
 
 
 # Dependency
