@@ -43,7 +43,7 @@ docker run -d -p 80:8000 -p 443:8000 -e OPENAI_API_KEY={Write Your Key} edu-agen
 ```bash
 curl \
 --verbose \
---request GET \
+--request OPTION \
 'http://localhost:8000' \
 --header 'Origin: https://ai-note-six.vercel.app/' \
 --header 'Access-Control-Request-Headers: Origin, Accept, Content-Type' \
