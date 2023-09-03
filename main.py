@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, status, UploadFile, Form, File, HTTPException, Depends
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, Response
+from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 # from db import engine, SessionLocal
@@ -25,6 +26,20 @@ summary_model = SummaryModel()
 
 app = FastAPI(debug=True)
 handler = Mangum(app)
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "https://ai-note-six.vercel.app/",
+    "https://ai-note-git-develop-mi-gongan.vercel.app",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Dependency
