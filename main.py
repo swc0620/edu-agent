@@ -2,6 +2,7 @@
 import io
 import os
 from typing import Union
+from time import time
 
 import openai
 from dotenv import load_dotenv
@@ -22,7 +23,7 @@ summary_model = SummaryModel()
 
 # models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(debug=True)
 handler = Mangum(app)
 
 
@@ -54,6 +55,7 @@ class NamedBytesIO(io.BytesIO):
 
 def read_audio_file(audio_file: UploadFile):
     """Read audio file"""
+    print("Read Audio File")
     audio = audio_file.file.read()
     contents = NamedBytesIO(audio, name=audio_file.filename)
     return send_to_openai(contents)
@@ -61,12 +63,19 @@ def read_audio_file(audio_file: UploadFile):
 
 def send_to_openai(audio):
     """Send audio to OpenAI"""
+    print("Send audio to OpenAI")
+    start_time = time()
     resp = openai.Audio.transcribe(
         file=audio,
         model=WHISPER_MODEL,
     )
-    total_result, intermediate_results=summary_model.run(resp.text)
-    return total_result
+    end_time = time()
+    print(f"Audio Transribe Time: {end_time-start_time}s")
+    
+    print("Run Summary Model")
+    summary_result = summary_model.run(resp.text)
+    
+    return summary_result
 
 
 @app.get("/")
