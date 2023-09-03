@@ -30,7 +30,7 @@ handler = Mangum(app)
 origins = [
     "http://localhost",
     "http://localhost:8000",
-    "https://ai-note-six.vercel.app/",
+    "https://ai-note-six.vercel.app",
     "https://ai-note-git-develop-mi-gongan.vercel.app",
 ]
 app.add_middleware(
