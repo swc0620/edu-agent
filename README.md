@@ -23,3 +23,29 @@ docker-compose up
 - [ ] Separate api calls from main.py
 - [ ] Make dockerfile
 - [ ] Add message queue
+
+## Run
+### Run Server in Python Code
+```bash
+python main.py
+```
+
+### Using Docker
+```bash
+docker build --tag edu-agent-api
+```
+```bash
+docker run -d -p 80:8000 -p 443:8000 -e OPENAI_API_KEY={Write Your Key} edu-agent-api
+```
+
+## Test
+### CORS Test
+```bash
+curl \
+--verbose \
+--request OPTIONS \
+'http://localhost:8000' \
+--header 'Origin: https://ai-note-six.vercel.app/' \
+--header 'Access-Control-Request-Headers: Origin, Accept, Content-Type' \
+--header 'Access-Control-Request-Method: GET'
+```
