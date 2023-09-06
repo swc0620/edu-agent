@@ -111,7 +111,7 @@ def healthz():
 
 
 @app.post("/audio")
-async def upload_audio(audio_file: UploadFile = File(...)):
+def upload_audio(audio_file: UploadFile = File(...)):
     """Upload audio file endpoint"""
     if not audio_file or audio_file.filename.split('.')[-1] not in ["mp3", "mp4"]:
         raise HTTPException(status_code=400, detail="Invalid file format. Only mp3 and mp4 are supported.")
