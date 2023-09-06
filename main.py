@@ -93,11 +93,16 @@ def send_to_openai(audio):
     return summary_result
 
 
-@app.get("/")
-def read_root():
-    """Root endpoint"""
-    return Response(status_code=status.HTTP_200_OK)
+@app.get(
+    '/',
+    summary='Test root endpoint',
+    description='Test root endpoint provided for automatic health checks.'
+)
+async def get_root():
 
+    return {
+        'info': 'edu-agent-api endpoint is healthy and running.'
+    }
 
 @app.get("/healthz")
 def healthz():
