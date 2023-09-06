@@ -32,6 +32,8 @@ origins = [
     "http://localhost:8000",
     "https://ai-note-six.vercel.app",
     "https://ai-note-git-develop-mi-gongan.vercel.app",
+    "https://www.personal-audio-note.xyz",
+    "https://personal-audio-note.xyz"
 ]
 app.add_middleware(
     CORSMiddleware,
